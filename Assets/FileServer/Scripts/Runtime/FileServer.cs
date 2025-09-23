@@ -7,22 +7,33 @@ using EmbedIO.Actions;
 using EmbedIO.Files;
 using Swan.Logging;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace FileServer
 {
-    public class WebServerController : MonoBehaviour
+    public class FileServer
     {
-        public string url = "http://localhost:9696/";
-        public bool openBrowser = true;
+        public string IPAddress { get; set; }
+        public string Port { get; set; }
+        public bool OpenBrowser { get; set; }
 
         private WebServer _server;
 
-        private void Start()
+        public bool IsRunning => _server != null;
+
+        public void StartServer()
         {
+            if (IsRunning)
+            {
+                Debug.Log("Server is already running.");
+                return;
+            }
+
+            var url = $"http://{IPAddress}:{Port}/";
             _server = CreateWebServer(url);
             _server.RunAsync();
 
-            if (openBrowser)
+            if (OpenBrowser)
             {
                 // Open web browser locally
                 var browser = new Process()
@@ -31,11 +42,16 @@ namespace FileServer
                 };
                 browser.Start();
             }
+
+            Debug.Log($"Server started at {url}");
         }
 
-        private void OnDestroy()
+        public void StopServer()
         {
             _server?.Dispose();
+            _server = null;
+
+            Debug.Log("Server stopped.");
         }
 
         private static WebServer CreateWebServer(string url)

@@ -66,7 +66,7 @@ namespace FileServer
                     Application.persistentDataPath,
                     true,
                     m => m
-                        .WithDirectoryLister(DirectoryLister.Html)
+                        .WithDirectoryLister(CustomDirectoryLister.Instance)
                         .WithoutDefaultDocument())
                 // Add static files after other modules to avoid conflicts
                 .WithModule(new ActionModule("/", HttpVerbs.Any, ctx => ctx.SendDataAsync(new { Message = "Error" })));

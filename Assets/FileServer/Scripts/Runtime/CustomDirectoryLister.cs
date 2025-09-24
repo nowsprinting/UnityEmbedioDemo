@@ -45,7 +45,10 @@ namespace FileServer
             if (!info.IsDirectory)
                 throw SelfCheck.Failure("HtmlDirectoryLister.ListDirectoryAsync invoked with a file, not a directory.",
                     "C:\\Unosquare\\embedio\\src\\EmbedIO\\Files\\Internal\\HtmlDirectoryLister.cs", 37);
-            string str = WebUtility.HtmlEncode(absoluteUrlPath);
+            string str = WebUtility.UrlDecode(absoluteUrlPath);
+            string current = absoluteUrlPath[1..]; // not encode/decode.
+            if (current.Length > 0 && current[^1] != '/')
+                current += '/';
             using (StreamWriter text = new StreamWriter(stream, WebServer.DefaultEncoding))
             {
                 text.Write("<html><head><title>Index of ");
@@ -61,9 +64,9 @@ namespace FileServer
                              .OrderBy<MappedResourceInfo, string>((Func<MappedResourceInfo, string>)(e => e.Name)))
                 {
                     text.Write(
-                        $"<a href=\"{Uri.EscapeDataString(mappedResourceInfo.Name)}\">{WebUtility.HtmlEncode(mappedResourceInfo.Name)}</a>");
+                        $"<a href=\"{current}{Uri.EscapeDataString(mappedResourceInfo.Name)}\">{WebUtility.HtmlEncode(mappedResourceInfo.Name)}</a>");
                     text.Write(new string(' ', Math.Max(1, 50 - mappedResourceInfo.Name.Length + 1)));
-                    text.Write(HttpDate.Format(mappedResourceInfo.LastModifiedUtc));
+                    text.Write(HttpDate.Format(mappedResourceInfo.LastModifiedUtc)); // TODO: to local time
                     text.Write('\n');
                     await Task.Yield();
                 }
@@ -73,9 +76,9 @@ namespace FileServer
                              .OrderBy<MappedResourceInfo, string>((Func<MappedResourceInfo, string>)(e => e.Name)))
                 {
                     text.Write(
-                        $"<a href=\"{Uri.EscapeDataString(mappedResourceInfo.Name)}\">{WebUtility.HtmlEncode(mappedResourceInfo.Name)}</a>");
+                        $"<a href=\"{current}{Uri.EscapeDataString(mappedResourceInfo.Name)}\">{WebUtility.HtmlEncode(mappedResourceInfo.Name)}</a>");
                     text.Write(new string(' ', Math.Max(1, 50 - mappedResourceInfo.Name.Length + 1)));
-                    text.Write(HttpDate.Format(mappedResourceInfo.LastModifiedUtc));
+                    text.Write(HttpDate.Format(mappedResourceInfo.LastModifiedUtc)); // TODO: to local time
                     text.Write(
                         $" {mappedResourceInfo.Length.ToString("#,###", (IFormatProvider)CultureInfo.InvariantCulture),-20}\n");
                     await Task.Yield();

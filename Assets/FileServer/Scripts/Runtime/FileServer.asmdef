@@ -8,7 +8,8 @@
     "overrideReferences": true,
     "precompiledReferences": [
         "EmbedIO.dll",
-        "Swan.Lite.dll"
+        "Swan.Lite.dll",
+        "HttpMultipartParser.dll"
     ],
     "autoReferenced": true,
     "defineConstraints": [],

@@ -5,6 +5,7 @@ using System.Diagnostics;
 using EmbedIO;
 using EmbedIO.Actions;
 using EmbedIO.Files;
+using EmbedIO.WebApi;
 using Swan.Logging;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
@@ -56,17 +57,20 @@ namespace FileServer
 
         private static WebServer CreateWebServer(string url)
         {
+            UploadController.RootPath = Application.persistentDataPath; // Note: Can only be get on the main thread
+
             var server = new WebServer(o => o
                     .WithUrlPrefix(url)
                     .WithMode(HttpListenerMode.EmbedIO))
                 // First, we will configure our web server by adding Modules.
                 .WithLocalSessionManager()
+                .WithWebApi("/api", m => m.WithController<UploadController>())
                 .WithStaticFolder(
                     "/",
                     Application.persistentDataPath,
                     true,
                     m => m
-                        .WithDirectoryLister(CustomDirectoryLister.Instance)
+                        .WithDirectoryLister(UploadableDirectoryLister.Instance)
                         .WithoutDefaultDocument())
                 // Add static files after other modules to avoid conflicts
                 .WithModule(new ActionModule("/", HttpVerbs.Any, ctx => ctx.SendDataAsync(new { Message = "Error" })));

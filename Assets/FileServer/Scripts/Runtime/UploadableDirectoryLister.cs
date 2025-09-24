@@ -22,12 +22,13 @@ namespace FileServer
     /// <remarks>
     /// This class is a modified version of <see cref="EmbedIO.Files.Internal.HtmlDirectoryLister"/>.
     /// </remarks>
-    public class CustomDirectoryLister : IDirectoryLister
+    public class UploadableDirectoryLister : IDirectoryLister
     {
         private static readonly Lazy<IDirectoryLister> LazyInstance =
-            new Lazy<IDirectoryLister>((Func<IDirectoryLister>)(() => (IDirectoryLister)new CustomDirectoryLister()));
+            new Lazy<IDirectoryLister>(
+                (Func<IDirectoryLister>)(() => (IDirectoryLister)new UploadableDirectoryLister()));
 
-        private CustomDirectoryLister()
+        private UploadableDirectoryLister()
         {
         }
 
@@ -84,7 +85,11 @@ namespace FileServer
                     await Task.Yield();
                 }
 
-                text.Write("</pre><hr/></body></html>");
+                text.Write("</pre><hr/><pre>");
+                text.Write("<form action=\"/api/upload\" method=\"POST\" enctype=\"multipart/form-data\">");
+                text.Write("<input required type=\"file\" name=\"file\" /><br/>");
+                text.Write("<input type=\"submit\" value=\"Upload\" /></form>");
+                text.Write("</pre></body></html>");
             }
         }
     }
